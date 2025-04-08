@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:track_person/provider/original_place.dart';
 import 'package:track_person/util/app_routes.dart';
+import 'package:provider/provider.dart';
 
 class TrackPacientListScreen extends StatelessWidget {
   @override
@@ -17,8 +19,22 @@ class TrackPacientListScreen extends StatelessWidget {
         ],
       ),
 
-      body: Center(
-        child: CircularProgressIndicator(),
+      body: FutureBuilder(
+        future: Provider.of<OriginalPlace>(context, listen: false).loadPatients(),
+        builder: (ctx, snapshop) => snapshop.connectionState == ConnectionState.waiting
+                                      ? Center(child: CircularProgressIndicator(),)
+                                      : Consumer<OriginalPlace>(
+          child: Center(child: Text('Sem pacientes cadastrados'), ),
+          builder: (ctx, originalPlace, ch) => originalPlace.itemsCount == 0 
+                          ? ch! 
+                          : ListView.builder(
+                            itemCount: originalPlace.itemsCount,
+                            itemBuilder: (ctx, i) => ListTile(
+                              title: Text(originalPlace.itemByIndex(i).name),
+                              onTap: () {},
+                            ), 
+                          ),
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:track_person/provider/original_place.dart';
 import 'package:track_person/widgets/location_input.dart';
+import 'package:provider/provider.dart';
 
 class TrackPacientFormScreen extends StatefulWidget {
 
@@ -17,6 +19,16 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
     setState((){
       _pickedPosition = position;
     });
+  }
+
+  void _submitForm() {
+    if(_nameController.text.isEmpty) {
+      return;
+    }
+
+    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text);
+
+    Navigator.of(context).pop();
   }
 
   @override
@@ -64,7 +76,7 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
                                                 ) 
                                               ),
             ),
-            onPressed: () {}, 
+            onPressed: _submitForm, 
           )
         ],
       ),

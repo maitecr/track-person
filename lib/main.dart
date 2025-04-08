@@ -1,47 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:track_person/screens/track_pacient_form_screen.dart';
 import 'package:track_person/screens/track_pacient_list_screen.dart';
 import 'package:track_person/util/app_routes.dart';
+import 'package:track_person/provider/original_place.dart';
+import 'package:track_person/util/sqflite.dart';
+import 'package:path/path.dart' as path;
 
-void main() {
+
+// Future<void> deleteDatabaseFile() async {
+//   final dbPath = await getDatabasesPath();
+//   final fullPath = path.join(dbPath, 'track_person.db');
+//   await deleteDatabase(fullPath);
+//   print('🔥 Banco de dados deletado: $fullPath');
+// }
+
+Future<void> main() async {
+    // WidgetsFlutterBinding.ensureInitialized();
+    // await deleteDatabaseFile();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return ChangeNotifierProvider(
+      create: (ctx) => OriginalPlace(), 
+      child: MaterialApp(
+        title: 'Monitoramento',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        home: TrackPacientListScreen(),
+        routes: {
+          AppRoutes.TRACK_PACIENT_LIST: (ctx) => TrackPacientListScreen(),
+          AppRoutes.TRACK_PACIENT_FORM: (ctx) => TrackPacientFormScreen(),
+        },
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page')
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Monitoramento',
-      home: TrackPacientListScreen(),
-      routes: {
-        AppRoutes.TRACK_PACIENT_LIST: (ctx) => TrackPacientListScreen(),
-        AppRoutes.TRACK_PACIENT_FORM: (ctx) => TrackPacientFormScreen(),
-      },
     );
   }
 }
