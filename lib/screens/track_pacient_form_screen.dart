@@ -21,12 +21,14 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
     });
   }
 
-  void _submitForm() {
-    if(_nameController.text.isEmpty) {
-      return;
-    }
+  bool _isValidForm() {
+    return (_nameController.text.isNotEmpty && _pickedPosition != null); 
+  }
 
-    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text);
+  void _submitForm() {
+    if(!_isValidForm()) return;
+
+    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text, _pickedPosition!);
 
     Navigator.of(context).pop();
   }
@@ -76,7 +78,7 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
                                                 ) 
                                               ),
             ),
-            onPressed: _submitForm, 
+            onPressed: _isValidForm() ? _submitForm : null, 
           )
         ],
       ),

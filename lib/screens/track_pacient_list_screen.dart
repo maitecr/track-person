@@ -31,6 +31,7 @@ class TrackPacientListScreen extends StatelessWidget {
                             itemCount: originalPlace.itemsCount,
                             itemBuilder: (ctx, i) => ListTile(
                               title: Text(originalPlace.itemByIndex(i).name),
+                              subtitle: Text(originalPlace.itemByIndex(i).area!.first.address!),
                               onTap: () {},
                             ), 
                           ),

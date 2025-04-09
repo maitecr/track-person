@@ -1,8 +1,9 @@
 import 'dart:math';
-
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
+import 'package:track_person/util/location_util.dart';
 import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
@@ -39,21 +40,30 @@ class OriginalPlace with ChangeNotifier {
   }
 
 
-  void addTrackedPatient(String name) {
+  Future<void> addTrackedPatient(String name, LatLng position) async {
+
+    String address = await LocationUtil.getAddressFrom(position);
+
     final newPatient = PatientModel(
       id: Random().nextDouble().toString(), 
       name: name, 
-      area: null,
+      area: [
+          PlaceLocationModel(
+          latitude: position.latitude, 
+          longitude: position.longitude,
+          address: address,
+        ),
+      ]
     );
 
     _items.add(newPatient);
     SqfliteDB.insert('track_person', {
-    'id': newPatient.id,
-    'name': newPatient.name,
-    'lat': 0.0,
-    'lng': 0.0,
-    'address': '',
-      });
+      'id': newPatient.id,
+      'name': newPatient.name,
+      'lat': position.latitude,
+      'lng': position.longitude,
+      'address': address,
+    });
     notifyListeners();
   }
 

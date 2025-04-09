@@ -41,7 +41,7 @@ class _MapScreenState extends State<MapScreen> {
               icon: Icon(Icons.check),
               onPressed: _pickedPosition == null 
               ? null 
-              :   () {
+              : () {
                 Navigator.of(context).pop(_pickedPosition);
               }, 
             )
