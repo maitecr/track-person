@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:track_person/screens/track_pacient_detail_screen.dart';
 import 'package:track_person/screens/track_pacient_form_screen.dart';
 import 'package:track_person/screens/track_pacient_list_screen.dart';
 import 'package:track_person/util/app_routes.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         routes: {
           AppRoutes.TRACK_PACIENT_LIST: (ctx) => TrackPacientListScreen(),
           AppRoutes.TRACK_PACIENT_FORM: (ctx) => TrackPacientFormScreen(),
+          AppRoutes.TRACK_PATIENT_DETAIL: (ctx) => TrackPacientDetailScreen(),
         },
       ),
     );

@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
@@ -7,25 +9,57 @@ import 'package:track_person/util/location_util.dart';
 import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
-  
+
+  final _firebaseUrl = [YOUR_FIREBASE_URL];
+
   List<PatientModel> _items = [];
 
   Future<void> loadPatients() async {
-    final dataList = await SqfliteDB.getData('track_person');
-  _items = dataList.map(
-    (item) => PatientModel(
-      id: item['id'],
-      name: item['name'],
-      area: [
-        PlaceLocationModel(
-          latitude: item['lat'],
-          longitude: item['lng'],
-          address: item['address'],
-        )
-      ],
-    ),
-  ).toList();
-  notifyListeners();  }
+    final response = await http.get(Uri.parse('$_firebaseUrl/track_person.json'));
+    print(jsonDecode(response.body));
+
+    if (response.statusCode == 200) {
+      final extractedData = jsonDecode(response.body) as Map<String, dynamic>?;
+      if (extractedData == null) return;
+
+          _items = extractedData.entries.map((entry) {
+        final data = entry.value;
+        final areaList = (data['area'] as List<dynamic>?)?.map((area) {
+          return PlaceLocationModel(
+            latitude: area['lat'],
+            longitude: area['lng'],
+            address: area['address'],
+          );
+        }).toList();
+
+        return PatientModel(
+          id: entry.key,
+          name: data['name'],
+          area: areaList,
+        );
+        }).toList();
+        
+        notifyListeners();
+    } else {
+      throw Exception('Erro ao carregar pacientes.');
+    }
+
+    // final dataList = await SqfliteDB.getData('track_person');
+    // _items = dataList.map(
+    //   (item) => PatientModel(
+    //     id: item['id'],
+    //     name: item['name'],
+    //     area: [
+    //       PlaceLocationModel(
+    //         latitude: item['lat'],
+    //         longitude: item['lng'],
+    //         address: item['address'],
+    //       )
+    //     ],
+    //   ),
+    // ).toList();
+    //notifyListeners();  
+  }
 
   List<PatientModel> get items {
     return [..._items];
@@ -38,7 +72,6 @@ class OriginalPlace with ChangeNotifier {
   PatientModel itemByIndex(int index) {
     return _items[index];
   }
-
 
   Future<void> addTrackedPatient(String name, LatLng position) async {
 
@@ -56,14 +89,26 @@ class OriginalPlace with ChangeNotifier {
       ]
     );
 
-    _items.add(newPatient);
-    SqfliteDB.insert('track_person', {
-      'id': newPatient.id,
-      'name': newPatient.name,
-      'lat': position.latitude,
-      'lng': position.longitude,
-      'address': address,
-    });
+    http.post(
+      Uri.parse('$_firebaseUrl/track_person.json'),
+      body: jsonEncode({
+        'name': newPatient.name,
+        'area': newPatient.area?.map((loc) => {
+          'lat': loc.latitude,
+          'lng': loc.longitude,
+          'address': loc.address,
+        }).toList(),
+      })
+    );
+
+    // _items.add(newPatient);
+    // SqfliteDB.insert('track_person', {
+    //   'id': newPatient.id,
+    //   'name': newPatient.name,
+    //   'lat': position.latitude,
+    //   'lng': position.longitude,
+    //   'address': address,
+    // });
     notifyListeners();
   }
 
