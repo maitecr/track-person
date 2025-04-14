@@ -112,4 +112,40 @@ class OriginalPlace with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> addLocationToPatient(String patientId, LatLng position) async {
+    final patientIndex = _items.indexWhere((p) => p.id == patientId);
+    if(patientIndex < 0) return;
+
+    String address = await LocationUtil.getAddressFrom(position);
+
+    final newLocation = PlaceLocationModel(
+      latitude: position.latitude, 
+      longitude: position.longitude,
+      address: address,
+    );
+
+    final updatedArea = [...?_items[patientIndex].area, newLocation];
+
+    final updatedPatient = PatientModel(
+      id: _items[patientIndex].id,
+      name: _items[patientIndex].name,
+      area: updatedArea,
+    );
+
+      _items[patientIndex] = updatedPatient;
+
+    await http.patch(
+      Uri.parse('$_firebaseUrl/track_person/${updatedPatient.id}.json'),
+      body: jsonEncode({
+        'area': updatedArea.map((loc) => {
+          'lat': loc.latitude,
+          'lng': loc.longitude,
+          'address': loc.address,
+        }).toList(),
+      }),
+    );
+
+    notifyListeners();
+  }
+
 }
