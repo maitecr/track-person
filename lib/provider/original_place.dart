@@ -26,6 +26,7 @@ class OriginalPlace with ChangeNotifier {
         final data = entry.value;
         final areaList = (data['area'] as List<dynamic>?)?.map((area) {
           return PlaceLocationModel(
+            title: area['title'],
             latitude: area['lat'],
             longitude: area['lng'],
             address: area['address'],
@@ -73,7 +74,7 @@ class OriginalPlace with ChangeNotifier {
     return _items[index];
   }
 
-  Future<void> addTrackedPatient(String name, LatLng position) async {
+  Future<void> addTrackedPatient(String name, String title, LatLng position) async {
 
     String address = await LocationUtil.getAddressFrom(position);
 
@@ -82,6 +83,7 @@ class OriginalPlace with ChangeNotifier {
       name: name, 
       area: [
           PlaceLocationModel(
+          title: title,
           latitude: position.latitude, 
           longitude: position.longitude,
           address: address,
@@ -94,6 +96,7 @@ class OriginalPlace with ChangeNotifier {
       body: jsonEncode({
         'name': newPatient.name,
         'area': newPatient.area?.map((loc) => {
+          'title': loc.title,
           'lat': loc.latitude,
           'lng': loc.longitude,
           'address': loc.address,
@@ -112,13 +115,14 @@ class OriginalPlace with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addLocationToPatient(String patientId, LatLng position) async {
+  Future<void> addLocationToPatient(String patientId, String title, LatLng position) async {
     final patientIndex = _items.indexWhere((p) => p.id == patientId);
     if(patientIndex < 0) return;
 
     String address = await LocationUtil.getAddressFrom(position);
 
     final newLocation = PlaceLocationModel(
+      title: title,
       latitude: position.latitude, 
       longitude: position.longitude,
       address: address,
@@ -138,6 +142,7 @@ class OriginalPlace with ChangeNotifier {
       Uri.parse('$_firebaseUrl/track_person/${updatedPatient.id}.json'),
       body: jsonEncode({
         'area': updatedArea.map((loc) => {
+          'title': loc.title,
           'lat': loc.latitude,
           'lng': loc.longitude,
           'address': loc.address,

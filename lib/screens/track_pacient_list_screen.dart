@@ -30,25 +30,31 @@ class _TrackPacientListScreenState extends State<TrackPacientListScreen> {
           ),
         ],
       ),
-      body: Consumer<OriginalPlace>(
-        builder: (ctx, originalPlace, ch) {
-          if (originalPlace.itemsCount == 0) {
-            return Center(child: Text('Sem pacientes cadastrados'));
-          }
-          return ListView.builder(
-            itemCount: originalPlace.itemsCount,
-            itemBuilder: (ctx, i) => ListTile(
-              title: Text(originalPlace.itemByIndex(i).name),
-              subtitle: Text(originalPlace.itemByIndex(i).area!.first.address!),
-              onTap: () {
-                Navigator.of(context).pushNamed(
-                  AppRoutes.TRACK_PATIENT_DETAIL,
-                  arguments: originalPlace.itemByIndex(i),
-                );
-              },
-            ),
-          );
+
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await Provider.of<OriginalPlace>(context, listen: false).loadPatients();
         },
+        child: Consumer<OriginalPlace>(
+          builder: (ctx, originalPlace, ch) {
+            if (originalPlace.itemsCount == 0) {
+              return Center(child: Text('Sem pacientes cadastrados'));
+            }
+            return ListView.builder(
+              itemCount: originalPlace.itemsCount,
+              itemBuilder: (ctx, i) => ListTile(
+                title: Text(originalPlace.itemByIndex(i).name),
+                subtitle: Text(originalPlace.itemByIndex(i).area!.first.address!),
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    AppRoutes.TRACK_PATIENT_DETAIL,
+                    arguments: originalPlace.itemByIndex(i),
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

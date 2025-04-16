@@ -20,6 +20,7 @@ class TrackPacientAddLocalFormScreen extends StatefulWidget {
 
 class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFormScreen> {
 
+  final _titleController = TextEditingController();
   LatLng? _pickedPosition;
 
   void _selectPosition(LatLng position) {
@@ -37,7 +38,7 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
   void _submitForm() {
     if(!_isValidForm()) return;
 
-    Provider.of<OriginalPlace>(context, listen: false).addLocationToPatient(widget.patient.id, _pickedPosition!);
+    Provider.of<OriginalPlace>(context, listen: false).addLocationToPatient(widget.patient.id, _titleController.text, _pickedPosition!);
 
     Navigator.of(context).pop();
   }
@@ -58,6 +59,16 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
                 padding: const EdgeInsets.all(10),
                 child: Column(
                   children: [
+
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Título do Local',
+                      ),
+                    ),
+
+                    SizedBox(height: 10,),
+                                     
                     LocationInput(_selectPosition),
 
                     Row(
@@ -85,7 +96,7 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
 
                     SizedBox(height: 10,),
 
-                    
+
 
                   ],
                 ),

@@ -12,6 +12,7 @@ class TrackPacientFormScreen extends StatefulWidget {
 
 class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
   final _nameController = TextEditingController();
+  final _titleController = TextEditingController();
 
   LatLng? _pickedPosition;
 
@@ -28,7 +29,7 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
   void _submitForm() {
     if(!_isValidForm()) return;
 
-    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text, _pickedPosition!);
+    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text, _titleController.text, _pickedPosition!);
 
     Navigator.of(context).pop();
   }
@@ -53,6 +54,15 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
                       controller: _nameController,
                       decoration: InputDecoration(
                         labelText: 'Nome',
+                      ),
+                    ),
+
+                    SizedBox(height: 10,),
+
+                    TextField(
+                      controller: _titleController,
+                      decoration: InputDecoration(
+                        labelText: 'Título do Local',
                       ),
                     ),
 
