@@ -6,13 +6,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MapScreen extends StatefulWidget {
 
-  final PlaceLocationModel initialLocation;
+  final List<PlaceLocationModel> locations;
   final bool isReadOnly;
 
   const MapScreen({super.key, 
-    this.initialLocation = const PlaceLocationModel(
-                            latitude: 37.422, 
-                            longitude: -122.084),
+    required this.locations,
     this.isReadOnly = false,
   });
  
@@ -34,7 +32,7 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Selecione...'),
+        title: Text(widget.isReadOnly ? 'Monitorando' : 'Selecione...'),
         actions: <Widget>[
           if(!widget.isReadOnly)
             IconButton(
@@ -47,23 +45,32 @@ class _MapScreenState extends State<MapScreen> {
             )
         ],
       ),
+
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: LatLng(
-            widget.initialLocation.latitude, 
-            widget.initialLocation.longitude,
+            widget.locations.first.latitude, 
+            widget.locations.first.longitude,
             ),
             zoom: 13,
         ),
         onTap: widget.isReadOnly ? null : _selectPosition,
-        markers: (_pickedPosition == null && !widget.isReadOnly) 
-              ? {}
-              : {
-                Marker(
-                  markerId: MarkerId('p1'),
-                  position: _pickedPosition ?? widget.initialLocation.toLatLng(),
-                ),
-              },
+        markers: widget.isReadOnly
+            ? widget.locations.map((loc) {
+                return Marker(
+                  markerId: MarkerId('${loc.latitude},${loc.longitude}'),
+                  position: LatLng(loc.latitude, loc.longitude),
+                  infoWindow: InfoWindow(title: loc.address),
+                );
+              }).toSet()
+            : _pickedPosition == null
+                ? {}
+                : {
+                    Marker(
+                      markerId: MarkerId('p1'),
+                      position: _pickedPosition!,
+                    ),
+                  },
         ),
     );
   }

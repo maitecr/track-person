@@ -85,7 +85,7 @@ class _TrackPacientDetailScreenState extends State<TrackPacientDetailScreen> {
                                 fullscreenDialog: true,
                                 builder: (ctx) => MapScreen(
                                   isReadOnly: true,
-                                  initialLocation: patient.area!.first,
+                                  locations: patient.area!,
                                 ),
                               ),
                             );
