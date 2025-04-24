@@ -3,7 +3,6 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:track_person/widgets/location_input.dart';
 import 'package:provider/provider.dart';
-
 class TrackPacientFormScreen extends StatefulWidget {
 
   @override

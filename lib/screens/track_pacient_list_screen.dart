@@ -41,10 +41,12 @@ class _TrackPacientListScreenState extends State<TrackPacientListScreen> {
               return Center(child: Text('Sem pacientes cadastrados'));
             }
             return ListView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              shrinkWrap: true,
               itemCount: originalPlace.itemsCount,
               itemBuilder: (ctx, i) => ListTile(
                 title: Text(originalPlace.itemByIndex(i).name),
-                subtitle: Text(originalPlace.itemByIndex(i).area!.first.address!),
+                subtitle: Text('Código: ${originalPlace.itemByIndex(i).code ?? 'Sem código'}'),
                 onTap: () {
                   Navigator.of(context).pushNamed(
                     AppRoutes.TRACK_PATIENT_DETAIL,

@@ -6,11 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
 import 'package:track_person/util/location_util.dart';
+import 'package:track_person/util/generate_patient_code.dart';
 import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
 
-  final _firebaseUrl = [YOUR_FIREBASE_URL];
+  //final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
 
@@ -22,7 +23,7 @@ class OriginalPlace with ChangeNotifier {
       final extractedData = jsonDecode(response.body) as Map<String, dynamic>?;
       if (extractedData == null) return;
 
-          _items = extractedData.entries.map((entry) {
+        _items = extractedData.entries.map((entry) {
         final data = entry.value;
         final areaList = (data['area'] as List<dynamic>?)?.map((area) {
           return PlaceLocationModel(
@@ -36,6 +37,7 @@ class OriginalPlace with ChangeNotifier {
         return PatientModel(
           id: entry.key,
           name: data['name'],
+          code: data['code'],
           area: areaList,
         );
         }).toList();
@@ -76,11 +78,15 @@ class OriginalPlace with ChangeNotifier {
 
   Future<void> addTrackedPatient(String name, String title, LatLng position) async {
 
+    String patientCode = generatePatientCode(name);
+    print(patientCode);
+
     String address = await LocationUtil.getAddressFrom(position);
 
     final newPatient = PatientModel(
       id: Random().nextDouble().toString(), 
       name: name, 
+      code: patientCode,
       area: [
           PlaceLocationModel(
           title: title,
@@ -95,6 +101,7 @@ class OriginalPlace with ChangeNotifier {
       Uri.parse('$_firebaseUrl/track_person.json'),
       body: jsonEncode({
         'name': newPatient.name,
+        'code': newPatient.code,
         'area': newPatient.area?.map((loc) => {
           'title': loc.title,
           'lat': loc.latitude,
