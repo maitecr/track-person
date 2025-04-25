@@ -14,10 +14,12 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
   final _titleController = TextEditingController();
 
   LatLng? _pickedPosition;
+  double? _pickedRadius;
 
-  void _selectPosition(LatLng position) {
+  void _selectPosition(LatLng position, double radius) {
     setState((){
       _pickedPosition = position;
+      _pickedRadius = radius;
     });
   }
 
@@ -28,7 +30,7 @@ class _TrackPacientFormScreenState extends State<TrackPacientFormScreen> {
   void _submitForm() {
     if(!_isValidForm()) return;
 
-    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text, _titleController.text, _pickedPosition!);
+    Provider.of<OriginalPlace>(context, listen: false).addTrackedPatient(_nameController.text, _titleController.text, _pickedPosition!, _pickedRadius!);
 
     Navigator.of(context).pop();
   }

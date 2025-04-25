@@ -22,23 +22,26 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
 
   final _titleController = TextEditingController();
   LatLng? _pickedPosition;
+  double? _pickedRadius;
 
-  void _selectPosition(LatLng position) {
+  void _selectPosition(LatLng position, double radius) {
     print(position.latitude);
     print(position.longitude);
+    print("Raio selecionado: $radius metros");
     setState((){
       _pickedPosition = position;
+      _pickedRadius = radius;
     });
   }
 
   bool _isValidForm() {
-    return (_pickedPosition != null); 
+    return (_pickedPosition != null && _pickedRadius != null); 
   }
 
   void _submitForm() {
     if(!_isValidForm()) return;
 
-    Provider.of<OriginalPlace>(context, listen: false).addLocationToPatient(widget.patient.id, _titleController.text, _pickedPosition!);
+    Provider.of<OriginalPlace>(context, listen: false).addLocationToPatient(widget.patient.id, _titleController.text, _pickedPosition!, _pickedRadius!);
 
     Navigator.of(context).pop();
   }
@@ -69,7 +72,7 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
 
                     SizedBox(height: 10,),
                                      
-                    LocationInput(_selectPosition),
+                    LocationInput(_selectPosition, ),
 
                     Row(
                       mainAxisSize: MainAxisSize.max,

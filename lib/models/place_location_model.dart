@@ -5,12 +5,14 @@ class PlaceLocationModel {
   final double latitude;
   final double longitude;
   final String? address;
+  final double? radius;
 
   const PlaceLocationModel({
     this.title,
     required this.latitude,
     required this.longitude,
     this.address,
+    this.radius,
   });
 
   LatLng toLatLng() {

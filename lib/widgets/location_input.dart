@@ -10,7 +10,7 @@ import 'package:track_person/util/location_util.dart';
 
 class LocationInput extends StatefulWidget {
 
-    final Function onSelectPosition;
+    final Function(LatLng, double) onSelectPosition;
   
     const LocationInput(this.onSelectPosition, {super.key});
 
@@ -20,7 +20,6 @@ class LocationInput extends StatefulWidget {
 
 class _LocationInputState extends State<LocationInput> {
   String? _previewImageUrl;
-
 
   void _showPreview(double lat, double lng) {
     final staticMapImageUrl = LocationUtil.generateLocationPreviewImage(
@@ -34,7 +33,8 @@ class _LocationInputState extends State<LocationInput> {
 
   Future<void> _selectOnMap() async {
     final currentLoc = await Location().getLocation();
-    final LatLng selectedPosition = await Navigator.of(context).push(
+
+    final Map selectionsResults = await Navigator.of(context).push(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (ctx) => MapScreen(
@@ -48,12 +48,19 @@ class _LocationInputState extends State<LocationInput> {
       )
     );
 
+    if(selectionsResults == null) return;
+
+    final LatLng selectedPosition = selectionsResults['position'];
+    final double selectedRadius = selectionsResults['radius'];
+
     _showPreview(selectedPosition.latitude, selectedPosition.longitude);
 
     print("PEGAR LOCALIZAÇÃO ATUAL - LAT: ${selectedPosition.latitude}");
     print("PEGAR LOCALIZAÇÃO ATUAL - LNG: ${selectedPosition.longitude}");
+      print("RAIO SELECIONADO: $selectedRadius metros");
 
-    widget.onSelectPosition(selectedPosition);
+
+    widget.onSelectPosition(selectedPosition, selectedRadius);
   }
 
   @override

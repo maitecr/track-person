@@ -11,7 +11,7 @@ import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
 
-  //final _firebaseUrl = [YOUR_FIREBASE_URL];
+  final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
 
@@ -31,6 +31,7 @@ class OriginalPlace with ChangeNotifier {
             latitude: area['lat'],
             longitude: area['lng'],
             address: area['address'],
+            radius: (area['radius'] as num?)?.toDouble(),
           );
         }).toList();
 
@@ -76,7 +77,7 @@ class OriginalPlace with ChangeNotifier {
     return _items[index];
   }
 
-  Future<void> addTrackedPatient(String name, String title, LatLng position) async {
+  Future<void> addTrackedPatient(String name, String title, LatLng position, double radius) async {
 
     String patientCode = generatePatientCode(name);
     print(patientCode);
@@ -93,6 +94,7 @@ class OriginalPlace with ChangeNotifier {
           latitude: position.latitude, 
           longitude: position.longitude,
           address: address,
+          radius: radius,
         ),
       ]
     );
@@ -107,6 +109,7 @@ class OriginalPlace with ChangeNotifier {
           'lat': loc.latitude,
           'lng': loc.longitude,
           'address': loc.address,
+          'radius': loc.radius,
         }).toList(),
       })
     );
@@ -122,7 +125,7 @@ class OriginalPlace with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addLocationToPatient(String patientId, String title, LatLng position) async {
+  Future<void> addLocationToPatient(String patientId, String title, LatLng position, double radius) async {
     final patientIndex = _items.indexWhere((p) => p.id == patientId);
     if(patientIndex < 0) return;
 
@@ -133,6 +136,7 @@ class OriginalPlace with ChangeNotifier {
       latitude: position.latitude, 
       longitude: position.longitude,
       address: address,
+      radius: radius,
     );
 
     final updatedArea = [...?_items[patientIndex].area, newLocation];
@@ -153,6 +157,7 @@ class OriginalPlace with ChangeNotifier {
           'lat': loc.latitude,
           'lng': loc.longitude,
           'address': loc.address,
+          'radius': loc.radius, 
         }).toList(),
       }),
     );
