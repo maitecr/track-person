@@ -11,7 +11,8 @@ import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
 
-  final _firebaseUrl = [YOUR_FIREBASE_URL];
+  final _firebaseUrl = 'https://track-person-fbb2f-default-rtdb.firebaseio.com';
+  //final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
 
@@ -40,6 +41,7 @@ class OriginalPlace with ChangeNotifier {
           name: data['name'],
           code: data['code'],
           area: areaList,
+          currentLocation: data['currentLocation']
         );
         }).toList();
         
@@ -96,10 +98,11 @@ class OriginalPlace with ChangeNotifier {
           address: address,
           radius: radius,
         ),
-      ]
+      ],
+      currentLocation: null,
     );
 
-    http.post(
+    await http.post(
       Uri.parse('$_firebaseUrl/track_person.json'),
       body: jsonEncode({
         'name': newPatient.name,
@@ -111,6 +114,7 @@ class OriginalPlace with ChangeNotifier {
           'address': loc.address,
           'radius': loc.radius,
         }).toList(),
+        'currentLocation': {},
       })
     );
 
@@ -141,13 +145,16 @@ class OriginalPlace with ChangeNotifier {
 
     final updatedArea = [...?_items[patientIndex].area, newLocation];
 
+    final oldPatient = _items[patientIndex];
+
     final updatedPatient = PatientModel(
       id: _items[patientIndex].id,
       name: _items[patientIndex].name,
       area: updatedArea,
+      currentLocation: oldPatient.currentLocation,
     );
 
-      _items[patientIndex] = updatedPatient;
+    _items[patientIndex] = updatedPatient;
 
     await http.patch(
       Uri.parse('$_firebaseUrl/track_person/${updatedPatient.id}.json'),

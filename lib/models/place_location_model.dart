@@ -19,4 +19,24 @@ class PlaceLocationModel {
     return LatLng(latitude, longitude);
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      "title": title,
+      "latitude": latitude,
+      "longitude": longitude,
+      "address": address,
+      "radius": radius,
+    };
+  }
+
+  factory PlaceLocationModel.fromJson(Map<String, dynamic> json) {
+    return PlaceLocationModel(
+      title: json['title'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      address: json['address'],
+      radius: (json['radius'] as num?)?.toDouble(),
+    );
+  }
+
 }

@@ -5,12 +5,14 @@ class PatientModel {
   final String name;
   final String? code;
   final List<PlaceLocationModel>? area;
+  final PlaceLocationModel? currentLocation;
 
   PatientModel({
     required this.id,
     required this.name,
     this.code,
     this.area,
+    this.currentLocation,
   });
  
 
@@ -19,7 +21,7 @@ class PatientModel {
     "name": name,
     "code": code,
     "area": area,
+    "currentLocation": currentLocation?.toJson(),
     };
   }
 }
-
