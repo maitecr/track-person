@@ -80,12 +80,17 @@ class _TrackPacientDetailScreenState extends State<TrackPacientDetailScreen> {
                         TextButton.icon(
                           icon: Icon(Icons.map),
                           onPressed: () {
+                              final locations = [
+                                        ...?patient.area, 
+                                        if (patient.currentLocation != null) patient.currentLocation!,
+                                        ];
+
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 fullscreenDialog: true,
                                 builder: (ctx) => MapScreen(
                                   isReadOnly: true,
-                                  locations: patient.area!,
+                                  locations: locations,
                                 ),
                               ),
                             );

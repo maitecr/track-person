@@ -29,12 +29,12 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-    void _submit() {
+  void _submit() {
     if (_pickedPosition == null) return;
-    Navigator.of(context).pop({
-      'position': _pickedPosition,
-      'radius': _delimitedRadius,
-    });
+      Navigator.of(context).pop({
+        'position': _pickedPosition,
+        'radius': _delimitedRadius,
+      });
   }
 
   @override
@@ -64,10 +64,17 @@ class _MapScreenState extends State<MapScreen> {
               onTap: widget.isReadOnly ? null : _selectPosition,
               markers: widget.isReadOnly
                   ? widget.locations.map((loc) {
+                      final isCurrent = loc.title == 'Localização Atual';
                       return Marker(
                         markerId: MarkerId('${loc.latitude},${loc.longitude}'),
                         position: LatLng(loc.latitude, loc.longitude),
-                        infoWindow: InfoWindow(title: loc.address),
+                        infoWindow: InfoWindow(
+                          title: isCurrent ? 'Localização atual' : loc.address ?? 'Local',
+                          snippet: loc.address,
+                        ),
+                        icon: isCurrent
+                                ? BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)
+                                : BitmapDescriptor.defaultMarker,
                       );
                     }).toSet()
                   : _pickedPosition == null
@@ -104,7 +111,7 @@ class _MapScreenState extends State<MapScreen> {
                 },
               ),
           ),
-                  if (!widget.isReadOnly && _pickedPosition != null)
+            if (!widget.isReadOnly && _pickedPosition != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(

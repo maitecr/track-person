@@ -11,8 +11,7 @@ import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
 
-  final _firebaseUrl = 'https://track-person-fbb2f-default-rtdb.firebaseio.com';
-  //final _firebaseUrl = [YOUR_FIREBASE_URL];
+  final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
 
@@ -26,6 +25,7 @@ class OriginalPlace with ChangeNotifier {
 
         _items = extractedData.entries.map((entry) {
         final data = entry.value;
+
         final areaList = (data['area'] as List<dynamic>?)?.map((area) {
           return PlaceLocationModel(
             title: area['title'],
@@ -36,12 +36,24 @@ class OriginalPlace with ChangeNotifier {
           );
         }).toList();
 
+      final currentLocationData = data['currentLocation'] as Map<String, dynamic>?;
+      final currentLocation = currentLocationData != null
+        ? PlaceLocationModel(
+            title: currentLocationData['title'],
+            latitude: currentLocationData['latitude'],
+            longitude: currentLocationData['longitude'],
+            address: currentLocationData['address'],
+            radius: (currentLocationData['radius'] as num?)?.toDouble(),
+          )
+        : null;
+
+
         return PatientModel(
           id: entry.key,
           name: data['name'],
           code: data['code'],
           area: areaList,
-          currentLocation: data['currentLocation']
+          currentLocation: currentLocation,
         );
         }).toList();
         
@@ -171,5 +183,7 @@ class OriginalPlace with ChangeNotifier {
 
     notifyListeners();
   }
+
+
 
 }
