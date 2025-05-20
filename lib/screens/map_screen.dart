@@ -1,17 +1,23 @@
+import 'dart:async';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:track_person/models/place_location_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
+import 'package:track_person/provider/original_place.dart';
 
 class MapScreen extends StatefulWidget {
 
   final List<PlaceLocationModel> locations;
+  final PlaceLocationModel? currentLocation;
+  final String? patientId;
   final bool isReadOnly;
 
   const MapScreen({super.key, 
     required this.locations,
     this.isReadOnly = false,
+    this.currentLocation,
+    this.patientId,
   });
  
   @override
@@ -22,6 +28,9 @@ class _MapScreenState extends State<MapScreen> {
 
   LatLng? _pickedPosition;
   double _delimitedRadius = 100;
+
+  PlaceLocationModel? _liveLocation;
+  Timer? _timer;
 
   void _selectPosition(LatLng position) {
     setState(() {
@@ -38,7 +47,41 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.isReadOnly && widget.patientId != null) {
+      // inicia polling para atualizar localização atual a cada 15 segundos
+      _fetchLiveLocation();
+      _timer = Timer.periodic(const Duration(seconds: 15), (timer) {
+        _fetchLiveLocation();
+      });
+    }
+  }
+
+  Future<void> _fetchLiveLocation() async {
+    final provider = Provider.of<OriginalPlace>(context, listen: false);
+    final loc = await provider.fetchCurrentLocation(widget.patientId!);
+    if (loc != null) {
+      setState(() {
+        _liveLocation = loc;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    final allLocations = [
+      ...widget.locations,
+      if (_liveLocation != null) _liveLocation!,
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isReadOnly ? 'Monitorando' : 'Selecione...'),
@@ -56,14 +99,14 @@ class _MapScreenState extends State<MapScreen> {
           Expanded(
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: widget.locations.isNotEmpty
-                ? LatLng(widget.locations.first.latitude, widget.locations.first.longitude,)
+                target: allLocations.isNotEmpty
+                ? LatLng(allLocations.first.latitude, allLocations.first.longitude,)
                 : LatLng(0, 0),
                 zoom: 13,
               ),
               onTap: widget.isReadOnly ? null : _selectPosition,
               markers: widget.isReadOnly
-                  ? widget.locations.map((loc) {
+                  ? allLocations.map((loc) {
                       final isCurrent = loc.title == 'Localização Atual';
                       return Marker(
                         markerId: MarkerId('${loc.latitude},${loc.longitude}'),
@@ -86,7 +129,9 @@ class _MapScreenState extends State<MapScreen> {
                           ),
                         },
               circles: widget.isReadOnly
-                      ? widget.locations.map((loc) {
+                      ? allLocations
+                        .where((loc) => loc.title != 'Localização Atual')
+                        .map((loc) {
                           return Circle(
                             circleId: CircleId('${loc.latitude},${loc.longitude}'),
                             center: LatLng(loc.latitude, loc.longitude),

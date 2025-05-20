@@ -184,6 +184,31 @@ class OriginalPlace with ChangeNotifier {
     notifyListeners();
   }
 
+Future<PlaceLocationModel?> fetchCurrentLocation(String patientId) async {
+  try {
+    final response = await http.get(Uri.parse('$_firebaseUrl/track_person/$patientId/currentLocation.json'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data == null || data['latitude'] == null || data['longitude'] == null) return null;
+
+      return PlaceLocationModel(
+        title: data['title'] ?? 'Localização Atual',
+        latitude: data['latitude'],
+        longitude: data['longitude'],
+        address: data['address'] ?? 'Endereço desconhecido',
+        radius: (data['radius'] as num?)?.toDouble(),
+      );
+    } else {
+      print('Erro ao buscar localização: ${response.statusCode}');
+      return null;
+    }
+  } catch (e) {
+    print('Erro ao buscar localização atual: $e');
+    return null;
+  }
+}
 
 
 }

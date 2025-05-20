@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:track_person/models/patient_model.dart';
-//import 'package:map_places/screens/live_location_screen.dart';
 import 'package:track_person/screens/map_screen.dart';
 import 'package:track_person/screens/track_pacient_add_local_form_screen.dart';
 import 'package:track_person/provider/original_place.dart';
@@ -91,6 +90,7 @@ class _TrackPacientDetailScreenState extends State<TrackPacientDetailScreen> {
                                 builder: (ctx) => MapScreen(
                                   isReadOnly: true,
                                   locations: locations,
+                                  currentLocation: patient.currentLocation
                                 ),
                               ),
                             );
