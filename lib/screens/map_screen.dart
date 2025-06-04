@@ -96,11 +96,10 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
 
-    final allLocations = [
-      ...widget.locations,
-      if (_liveLocation != null) _liveLocation!,
-    ];
-
+  final allLocations = [
+    ...widget.locations.where((loc) => loc.title != 'Localização Atual'),
+    if (_liveLocation != null) _liveLocation!,
+  ];
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isReadOnly ? 'Monitorando' : 'Selecione...'),

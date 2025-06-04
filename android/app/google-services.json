@@ -1,7 +1,7 @@
 {
   "project_info": {
     "project_number": "1083737833428",
-    "firebase_url": "https://track-patient-cb919-default-rtdb.firebaseio.com",
+    "firebase_url": "[YOU_FIRE_BASE_URL_HERE]",
     "project_id": "track-patient-cb919",
     "storage_bucket": "track-patient-cb919.firebasestorage.app"
   },
@@ -16,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDob4S0lgkbKcVQYt8cYOpTAndLaWdH1Ds"
+          "current_key": "[YOUR_GOOGLE_API_HERE]"
         }
       ],
       "services": {

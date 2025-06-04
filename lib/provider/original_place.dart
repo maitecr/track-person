@@ -10,49 +10,56 @@ import 'package:track_person/models/place_location_model.dart';
 import 'package:track_person/util/location_util.dart';
 import 'package:track_person/util/generate_patient_code.dart';
 import 'package:track_person/util/check_area_delimited.dart';
-import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
-
-  final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
 
   Timer? _verificacaoTimer;
 
   void iniciarVerificacaoPeriodica({Duration intervalo = const Duration(seconds: 10)}) {
-  _verificacaoTimer?.cancel(); // Evita múltiplos timers
+    _verificacaoTimer?.cancel(); // Evita múltiplos timers
 
-  _verificacaoTimer = Timer.periodic(intervalo, (_) {
-    for (final patient in _items) {
-      CheckAreaDelimited.verificar(patient);
-    }
-  });
-}
+    _verificacaoTimer = Timer.periodic(intervalo, (_) {
+      for (final patient in _items) {
+        CheckAreaDelimited.verificar(patient);
+      }
+    });
+  }
 
   Future<void> loadPatients() async {
-    final response = await http.get(Uri.parse('$_firebaseUrl/track_person.json'));
-    print(jsonDecode(response.body));
+    final ref = FirebaseDatabase.instance.ref('track_person');
 
-    if (response.statusCode == 200) {
-      final extractedData = jsonDecode(response.body) as Map<String, dynamic>?;
-      if (extractedData == null) return;
+    final snapshot = await ref.get();
 
-        _items = extractedData.entries.map((entry) {
-        final data = entry.value;
+    if (!snapshot.exists) {
+      print('Nenhum paciente encontrado no banco.');
+      return;
+    }
 
-        final areaList = (data['area'] as List<dynamic>?)?.map((area) {
-          return PlaceLocationModel(
-            title: area['title'],
-            latitude: area['lat'],
-            longitude: area['lng'],
-            address: area['address'],
-            radius: (area['radius'] as num?)?.toDouble(),
-          );
-        }).toList();
+    final extractedData = snapshot.value as Map<dynamic, dynamic>?;
 
-        final currentLocationData = data['currentLocation'] as Map<String, dynamic>?;
-        final currentLocation = currentLocationData != null
+    if (extractedData == null) return;
+
+    _items = extractedData.entries.map((entry) {
+      final key = entry.key as String;
+      final data = entry.value as Map<dynamic, dynamic>;
+
+      final areaList = (data['area'] as List<dynamic>?)
+          ?.where((area) => area != null)
+          .map((area) {
+        final areaMap = area as Map<dynamic, dynamic>;
+        return PlaceLocationModel(
+          title: areaMap['title'],
+          latitude: areaMap['lat'],
+          longitude: areaMap['lng'],
+          address: areaMap['address'],
+          radius: (areaMap['radius'] as num?)?.toDouble(),
+        );
+      }).toList();
+
+      final currentLocationData = data['currentLocation'] as Map<dynamic, dynamic>?;
+      final currentLocation = currentLocationData != null
           ? PlaceLocationModel(
               title: currentLocationData['title'],
               latitude: currentLocationData['latitude'],
@@ -62,38 +69,18 @@ class OriginalPlace with ChangeNotifier {
             )
           : null;
 
+      return PatientModel(
+        id: key,
+        name: data['name'],
+        code: data['code'],
+        area: areaList,
+        currentLocation: currentLocation,
+      );
+    }).toList();
 
-        return PatientModel(
-          id: entry.key,
-          name: data['name'],
-          code: data['code'],
-          area: areaList,
-          currentLocation: currentLocation,
-        );
-        }).toList();
-        
-        iniciarVerificacaoPeriodica();
+    _items.sort((a, b) => a.name.compareTo(b.name)); 
 
-        notifyListeners();
-    } else {
-      throw Exception('Erro ao carregar pacientes.');
-    }
-
-    // final dataList = await SqfliteDB.getData('track_person');
-    // _items = dataList.map(
-    //   (item) => PatientModel(
-    //     id: item['id'],
-    //     name: item['name'],
-    //     area: [
-    //       PlaceLocationModel(
-    //         latitude: item['lat'],
-    //         longitude: item['lng'],
-    //         address: item['address'],
-    //       )
-    //     ],
-    //   ),
-    // ).toList();
-    //notifyListeners();  
+    notifyListeners();
   }
 
   List<PatientModel> get items {
@@ -109,20 +96,17 @@ class OriginalPlace with ChangeNotifier {
   }
 
   Future<void> addTrackedPatient(String name, String title, LatLng position, double radius) async {
-
     String patientCode = generatePatientCode(name);
-    print(patientCode);
-
     String address = await LocationUtil.getAddressFrom(position);
 
     final newPatient = PatientModel(
-      id: Random().nextDouble().toString(), 
-      name: name, 
+      id: '', 
+      name: name,
       code: patientCode,
       area: [
-          PlaceLocationModel(
+        PlaceLocationModel(
           title: title,
-          latitude: position.latitude, 
+          latitude: position.latitude,
           longitude: position.longitude,
           address: address,
           radius: radius,
@@ -131,42 +115,33 @@ class OriginalPlace with ChangeNotifier {
       currentLocation: null,
     );
 
-    await http.post(
-      Uri.parse('$_firebaseUrl/track_person.json'),
-      body: jsonEncode({
-        'name': newPatient.name,
-        'code': newPatient.code,
-        'area': newPatient.area?.map((loc) => {
-          'title': loc.title,
-          'lat': loc.latitude,
-          'lng': loc.longitude,
-          'address': loc.address,
-          'radius': loc.radius,
-        }).toList(),
-        'currentLocation': {},
-      })
-    );
+    final ref = FirebaseDatabase.instance.ref('track_person').push(); // cria um novo ID único
 
-    // _items.add(newPatient);
-    // SqfliteDB.insert('track_person', {
-    //   'id': newPatient.id,
-    //   'name': newPatient.name,
-    //   'lat': position.latitude,
-    //   'lng': position.longitude,
-    //   'address': address,
-    // });
+    await ref.set({
+      'name': newPatient.name,
+      'code': newPatient.code,
+      'area': newPatient.area?.map((loc) => {
+        'title': loc.title,
+        'lat': loc.latitude,
+        'lng': loc.longitude,
+        'address': loc.address,
+        'radius': loc.radius,
+      }).toList(),
+      'currentLocation': {},
+    });
+
     notifyListeners();
   }
 
   Future<void> addLocationToPatient(String patientId, String title, LatLng position, double radius) async {
     final patientIndex = _items.indexWhere((p) => p.id == patientId);
-    if(patientIndex < 0) return;
+    if (patientIndex < 0) return;
 
     String address = await LocationUtil.getAddressFrom(position);
 
     final newLocation = PlaceLocationModel(
       title: title,
-      latitude: position.latitude, 
+      latitude: position.latitude,
       longitude: position.longitude,
       address: address,
       radius: radius,
@@ -185,18 +160,15 @@ class OriginalPlace with ChangeNotifier {
 
     _items[patientIndex] = updatedPatient;
 
-    await http.patch(
-      Uri.parse('$_firebaseUrl/track_person/${updatedPatient.id}.json'),
-      body: jsonEncode({
-        'area': updatedArea.map((loc) => {
-          'title': loc.title,
-          'lat': loc.latitude,
-          'lng': loc.longitude,
-          'address': loc.address,
-          'radius': loc.radius, 
-        }).toList(),
-      }),
-    );
+    final ref = FirebaseDatabase.instance.ref('track_person/$patientId/area');
+
+    await ref.set(updatedArea.map((loc) => {
+      'title': loc.title,
+      'lat': loc.latitude,
+      'lng': loc.longitude,
+      'address': loc.address,
+      'radius': loc.radius,
+    }).toList());
 
     notifyListeners();
   }
@@ -225,6 +197,8 @@ Future<PlaceLocationModel?> fetchCurrentLocation(String patientId) async {
 
   print('📍 Localização atual do paciente $patientId: '
       '(${location.latitude}, ${location.longitude})');
+
+  iniciarVerificacaoPeriodica();
 
   return location;
 }
