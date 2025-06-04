@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:track_person/models/place_location_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:track_person/provider/original_place.dart';
@@ -32,6 +31,8 @@ class _MapScreenState extends State<MapScreen> {
   PlaceLocationModel? _liveLocation;
   Timer? _timer;
 
+  GoogleMapController? _mapController;
+
   void _selectPosition(LatLng position) {
     setState(() {
       _pickedPosition = position;
@@ -49,23 +50,41 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.isReadOnly && widget.patientId != null) {
-      // inicia polling para atualizar localização atual a cada 15 segundos
       _fetchLiveLocation();
       _timer = Timer.periodic(const Duration(seconds: 15), (timer) {
         _fetchLiveLocation();
       });
-    }
   }
 
   Future<void> _fetchLiveLocation() async {
+    print('Entrou no fetchLiveLocation');
+
+    print('Iniciando fetchLiveLocation para paciente: ${widget.patientId}');
+
+    if (widget.patientId == null) {
+      print('patientId é nulo, abortando fetch.');
+      return;
+    }
+
     final provider = Provider.of<OriginalPlace>(context, listen: false);
     final loc = await provider.fetchCurrentLocation(widget.patientId!);
+
     if (loc != null) {
       setState(() {
         _liveLocation = loc;
       });
+
+      if (_mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLng(
+            LatLng(loc.latitude, loc.longitude),
+          ),
+        );
+      }
+    } else {
+      print('Localização atual não disponível.');
     }
+
   }
 
   @override
@@ -98,6 +117,9 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           Expanded(
             child: GoogleMap(
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
               initialCameraPosition: CameraPosition(
                 target: allLocations.isNotEmpty
                 ? LatLng(allLocations.first.latitude, allLocations.first.longitude,)

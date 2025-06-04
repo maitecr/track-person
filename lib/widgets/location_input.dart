@@ -57,7 +57,7 @@ class _LocationInputState extends State<LocationInput> {
 
     print("PEGAR LOCALIZAÇÃO ATUAL - LAT: ${selectedPosition.latitude}");
     print("PEGAR LOCALIZAÇÃO ATUAL - LNG: ${selectedPosition.longitude}");
-      print("RAIO SELECIONADO: $selectedRadius metros");
+    print("RAIO SELECIONADO: $selectedRadius metros");
 
 
     widget.onSelectPosition(selectedPosition, selectedRadius);

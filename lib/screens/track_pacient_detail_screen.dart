@@ -90,7 +90,8 @@ class _TrackPacientDetailScreenState extends State<TrackPacientDetailScreen> {
                                 builder: (ctx) => MapScreen(
                                   isReadOnly: true,
                                   locations: locations,
-                                  currentLocation: patient.currentLocation
+                                  currentLocation: patient.currentLocation,
+                                  patientId: patient.id,
                                 ),
                               ),
                             );

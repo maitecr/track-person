@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
 import 'package:track_person/util/location_util.dart';
 import 'package:track_person/util/generate_patient_code.dart';
+import 'package:track_person/util/check_area_delimited.dart';
 import 'package:track_person/util/sqflite.dart';
 
 class OriginalPlace with ChangeNotifier {
@@ -14,6 +17,18 @@ class OriginalPlace with ChangeNotifier {
   final _firebaseUrl = [YOUR_FIREBASE_URL];
 
   List<PatientModel> _items = [];
+
+  Timer? _verificacaoTimer;
+
+  void iniciarVerificacaoPeriodica({Duration intervalo = const Duration(seconds: 10)}) {
+  _verificacaoTimer?.cancel(); // Evita múltiplos timers
+
+  _verificacaoTimer = Timer.periodic(intervalo, (_) {
+    for (final patient in _items) {
+      CheckAreaDelimited.verificar(patient);
+    }
+  });
+}
 
   Future<void> loadPatients() async {
     final response = await http.get(Uri.parse('$_firebaseUrl/track_person.json'));
@@ -36,16 +51,16 @@ class OriginalPlace with ChangeNotifier {
           );
         }).toList();
 
-      final currentLocationData = data['currentLocation'] as Map<String, dynamic>?;
-      final currentLocation = currentLocationData != null
-        ? PlaceLocationModel(
-            title: currentLocationData['title'],
-            latitude: currentLocationData['latitude'],
-            longitude: currentLocationData['longitude'],
-            address: currentLocationData['address'],
-            radius: (currentLocationData['radius'] as num?)?.toDouble(),
-          )
-        : null;
+        final currentLocationData = data['currentLocation'] as Map<String, dynamic>?;
+        final currentLocation = currentLocationData != null
+          ? PlaceLocationModel(
+              title: currentLocationData['title'],
+              latitude: currentLocationData['latitude'],
+              longitude: currentLocationData['longitude'],
+              address: currentLocationData['address'],
+              radius: (currentLocationData['radius'] as num?)?.toDouble(),
+            )
+          : null;
 
 
         return PatientModel(
@@ -57,6 +72,8 @@ class OriginalPlace with ChangeNotifier {
         );
         }).toList();
         
+        iniciarVerificacaoPeriodica();
+
         notifyListeners();
     } else {
       throw Exception('Erro ao carregar pacientes.');
@@ -185,29 +202,31 @@ class OriginalPlace with ChangeNotifier {
   }
 
 Future<PlaceLocationModel?> fetchCurrentLocation(String patientId) async {
-  try {
-    final response = await http.get(Uri.parse('$_firebaseUrl/track_person/$patientId/currentLocation.json'));
+  final ref = FirebaseDatabase.instance.ref('track_person/$patientId/currentLocation');
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+  final snapshot = await ref.get();
 
-      if (data == null || data['latitude'] == null || data['longitude'] == null) return null;
+  print('Conectou no banco de dados para o paciente $patientId');
 
-      return PlaceLocationModel(
-        title: data['title'] ?? 'Localização Atual',
-        latitude: data['latitude'],
-        longitude: data['longitude'],
-        address: data['address'] ?? 'Endereço desconhecido',
-        radius: (data['radius'] as num?)?.toDouble(),
-      );
-    } else {
-      print('Erro ao buscar localização: ${response.statusCode}');
-      return null;
-    }
-  } catch (e) {
-    print('Erro ao buscar localização atual: $e');
+  if (!snapshot.exists) {
+    print('Localização não encontrada para o paciente $patientId');
     return null;
   }
+
+  final data = snapshot.value as Map<dynamic, dynamic>;
+
+  final location = PlaceLocationModel(
+    title: data['title'] ?? 'Localização Atual',
+    latitude: data['latitude'],
+    longitude: data['longitude'],
+    address: data['address'] ?? 'Endereço desconhecido',
+    radius: (data['radius'] as num?)?.toDouble(),
+  );
+
+  print('📍 Localização atual do paciente $patientId: '
+      '(${location.latitude}, ${location.longitude})');
+
+  return location;
 }
 
 

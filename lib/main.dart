@@ -7,8 +7,7 @@ import 'package:track_person/screens/track_pacient_list_screen.dart';
 import 'package:track_person/util/app_routes.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:track_person/util/sqflite.dart';
-import 'package:path/path.dart' as path;
-
+import 'package:firebase_core/firebase_core.dart';
 
 // Future<void> deleteDatabaseFile() async {
 //   final dbPath = await getDatabasesPath();
@@ -18,7 +17,9 @@ import 'package:path/path.dart' as path;
 // }
 
 Future<void> main() async {
-    // WidgetsFlutterBinding.ensureInitialized();
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp();
+
     // await deleteDatabaseFile();
   runApp(const MyApp());
 }
