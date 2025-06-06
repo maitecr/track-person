@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:track_person/screens/auth_screen.dart';
 import 'package:track_person/screens/track_pacient_detail_screen.dart';
 import 'package:track_person/screens/track_pacient_form_screen.dart';
 import 'package:track_person/screens/track_pacient_list_screen.dart';
@@ -25,9 +27,11 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Monitoramento',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 26, 32, 92)),
         ),
-        home: TrackPacientListScreen(),
+        home:  FirebaseAuth.instance.currentUser != null 
+        ? TrackPacientListScreen()
+        : AuthScreen(), 
         routes: {
           AppRoutes.TRACK_PACIENT_LIST: (ctx) => TrackPacientListScreen(),
           AppRoutes.TRACK_PACIENT_FORM: (ctx) => TrackPacientFormScreen(),
