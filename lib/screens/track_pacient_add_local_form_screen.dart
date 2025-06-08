@@ -83,7 +83,7 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
                             icon: Icon(Icons.add),
                             label: Text('Adicionar'),
                             style: ButtonStyle(
-                              backgroundColor: WidgetStateProperty.all<Color>(Colors.amber),
+                              backgroundColor: WidgetStateProperty.all<Color>(Color.fromRGBO(117, 158, 255, 1)),
                               elevation: WidgetStateProperty.all<double>(0),
                               padding: WidgetStateProperty.all<EdgeInsets>(EdgeInsets.zero),
                               shape: WidgetStateProperty.all<RoundedRectangleBorder>(
