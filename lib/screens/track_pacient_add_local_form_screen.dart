@@ -4,6 +4,7 @@ import 'package:track_person/provider/original_place.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:track_person/models/patient_model.dart';
 import 'package:provider/provider.dart';
+import 'package:track_person/widgets/logout_button.dart';
 
 class TrackPacientAddLocalFormScreen extends StatefulWidget {
 

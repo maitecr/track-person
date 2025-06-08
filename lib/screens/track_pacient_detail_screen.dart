@@ -4,6 +4,7 @@ import 'package:track_person/screens/map_screen.dart';
 import 'package:track_person/screens/track_pacient_add_local_form_screen.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:provider/provider.dart';
+import 'package:track_person/widgets/logout_button.dart';
 
 class TrackPacientDetailScreen extends StatefulWidget {
   const TrackPacientDetailScreen({super.key});
@@ -39,6 +40,9 @@ class _TrackPacientDetailScreenState extends State<TrackPacientDetailScreen> {
       return Scaffold(
         appBar: AppBar(
           title: Text(patient.name),
+          actions: <Widget>[
+            LogoutButton(),
+          ],
         ),
         
         body: RefreshIndicator(

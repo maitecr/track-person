@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:track_person/util/app_routes.dart';
 import 'package:provider/provider.dart';
+import 'package:track_person/widgets/logout_button.dart';
 
 class TrackPacientListScreen extends StatefulWidget {
   @override
@@ -22,15 +23,17 @@ class _TrackPacientListScreenState extends State<TrackPacientListScreen> {
       appBar: AppBar(
         title: Text("Lista de monitorados"),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.of(context).pushNamed(AppRoutes.TRACK_PACIENT_FORM);
-            },
-          ),
+          LogoutButton(),
         ],
       ),
 
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed(AppRoutes.TRACK_PACIENT_FORM);
+        },
+        child: Icon(Icons.add),
+      ),
+  
       body: RefreshIndicator(
         onRefresh: () async {
           await Provider.of<OriginalPlace>(context, listen: false).loadPatients();

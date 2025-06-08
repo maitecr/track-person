@@ -14,7 +14,6 @@ class AuthSessionManager {
     _logoutTimer?.cancel(); 
     _logoutTimer = Timer(Duration(hours: 10), () async {
       await FirebaseAuth.instance.signOut();
-      print('Sessão encerrada automaticamente após 10s.');
     });
   }
 
