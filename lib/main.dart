@@ -9,6 +9,7 @@ import 'package:track_person/util/app_routes.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:track_person/util/check_area_delimited.dart';
+import 'package:track_person/util/auth_session_manager.dart';
 
 Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +30,22 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 26, 32, 92)),
         ),
-        home:  FirebaseAuth.instance.currentUser != null 
-        ? TrackPacientListScreen()
-        : AuthScreen(), 
+        home: StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasData) {
+                  // inicia o timer após login
+                  AuthSessionManager().startSessionTimeout();
+                  return TrackPacientListScreen();
+                } else {
+                  // cancela timer se deslogar
+                  AuthSessionManager().cancelTimeout();
+                  return AuthScreen();
+                }
+              },
+            ),
         routes: {
           AppRoutes.TRACK_PACIENT_LIST: (ctx) => TrackPacientListScreen(),
           AppRoutes.TRACK_PACIENT_FORM: (ctx) => TrackPacientFormScreen(),

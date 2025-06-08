@@ -81,17 +81,13 @@ class _AuthFormState extends State<AuthForm> {
       if (_isLogin()) {
         await _firebaseAuth.signInWithEmailAndPassword(
           email: _authData['email']!,
-          password: _authData['paswword']!,
+          password: _authData['password']!,
         );
-
-        Timer(Duration(hours: 1), () async {
-          await _firebaseAuth.signOut();
-        });
-
+;
       } else {
         await _firebaseAuth.createUserWithEmailAndPassword(
           email: _authData['email']!,
-          password: _authData['paswword']!,
+          password: _authData['password']!,
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -147,7 +143,7 @@ class _AuthFormState extends State<AuthForm> {
                 keyboardType: TextInputType.emailAddress,
                 obscureText: true,
                 controller: _passwordController,
-                onSaved: (paswword) => _authData['paswword'] = paswword ?? '',
+                onSaved: (password) => _authData['password'] = password ?? '',
                 validator: (_password) {
                   final password = _password ?? '';
                   if(password.isEmpty || password.length < 5) {
