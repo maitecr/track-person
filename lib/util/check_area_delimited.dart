@@ -1,9 +1,10 @@
 import 'dart:math';
 import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
+import 'package:track_person/util/notification_service.dart'; 
 
 class CheckAreaDelimited {
-  static void verificar(PatientModel patient) {
+  static void verificar(PatientModel patient) async {
     final current = patient.currentLocation;
     final areas = patient.area;
 
@@ -16,6 +17,10 @@ class CheckAreaDelimited {
 
     if (estaFora) {
       print('🚨 Paciente "${patient.name}" está FORA da área permitida!');
+      await NotificationService.showNotification(
+        'Alerta de Localização',
+        'O paciente "${patient.name}" saiu da área segura!',
+      );
     } else {
       print('✅ Paciente "${patient.name}" está dentro da área permitida.');
     }
@@ -33,15 +38,15 @@ class CheckAreaDelimited {
 
       final raio = area.radius ?? 0;
       if (distancia <= raio) {
-        return false; // está dentro de uma área
+        return false;
       }
     }
-    return true; // está fora de todas as áreas
+    return true;
   }
 
   static double _calcularDistanciaEmMetros(
       double lat1, double lon1, double lat2, double lon2) {
-    const double raioTerra = 6371000; // em metros
+    const double raioTerra = 6371000;
     final dLat = _deg2rad(lat2 - lat1);
     final dLon = _deg2rad(lon2 - lon1);
     final a = sin(dLat / 2) * sin(dLat / 2) +

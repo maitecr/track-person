@@ -100,6 +100,7 @@ class _MapScreenState extends State<MapScreen> {
     ...widget.locations.where((loc) => loc.title != 'Localização Atual'),
     if (_liveLocation != null) _liveLocation!,
   ];
+  
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isReadOnly ? 'Monitorando' : 'Selecione...'),

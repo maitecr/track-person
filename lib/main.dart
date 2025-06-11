@@ -8,12 +8,13 @@ import 'package:track_person/screens/track_pacient_list_screen.dart';
 import 'package:track_person/util/app_routes.dart';
 import 'package:track_person/provider/original_place.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:track_person/util/check_area_delimited.dart';
 import 'package:track_person/util/auth_session_manager.dart';
+import 'package:track_person/util/notification_service.dart';
 
 Future<void> main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp();
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  await NotificationService.initialize();
 
   runApp(const MyApp());
 }
@@ -34,11 +35,9 @@ class MyApp extends StatelessWidget {
               stream: FirebaseAuth.instance.authStateChanges(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  // inicia o timer após login
                   AuthSessionManager().startSessionTimeout();
                   return TrackPacientListScreen();
                 } else {
-                  // cancela timer se deslogar
                   AuthSessionManager().cancelTimeout();
                   return AuthScreen();
                 }

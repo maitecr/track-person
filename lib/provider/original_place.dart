@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:track_person/models/patient_model.dart';
 import 'package:track_person/models/place_location_model.dart';
@@ -15,17 +14,7 @@ class OriginalPlace with ChangeNotifier {
 
   List<PatientModel> _items = [];
 
-  Timer? _verificacaoTimer;
-
-  void iniciarVerificacaoPeriodica({Duration intervalo = const Duration(seconds: 10)}) {
-    _verificacaoTimer?.cancel(); // Evita múltiplos timers
-
-    _verificacaoTimer = Timer.periodic(intervalo, (_) {
-      for (final patient in _items) {
-        CheckAreaDelimited.verificar(patient);
-      }
-    });
-  }
+  Timer? _timerVerify;
 
   Future<void> loadPatients() async {
     final ref = FirebaseDatabase.instance.ref('track_person');
@@ -79,6 +68,8 @@ class OriginalPlace with ChangeNotifier {
     }).toList();
 
     _items.sort((a, b) => a.name.compareTo(b.name)); 
+
+    startTimerVerification();
 
     notifyListeners();
   }
@@ -198,10 +189,36 @@ Future<PlaceLocationModel?> fetchCurrentLocation(String patientId) async {
   print('📍 Localização atual do paciente $patientId: '
       '(${location.latitude}, ${location.longitude})');
 
-  iniciarVerificacaoPeriodica();
+  startTimerVerification();
 
   return location;
 }
 
+void startTimerVerification({Duration intervalo = const Duration(seconds: 15)}) {
+    _timerVerify?.cancel(); 
+
+    _timerVerify = Timer.periodic(intervalo, (_) async {
+      await updateCurrenLocations();
+      for (final patient in _items) {
+        CheckAreaDelimited.verificar(patient);
+      }
+    });
+  }
+
+Future<void> updateCurrenLocations() async {
+  for (int i = 0; i < _items.length; i++) {
+    final loc = await fetchCurrentLocation(_items[i].id);
+    if (loc != null) {
+      _items[i] = PatientModel(
+        id: _items[i].id,
+        name: _items[i].name,
+        code: _items[i].code,
+        area: _items[i].area,
+        currentLocation: loc,
+      );
+    }
+  }
+  notifyListeners();
+}
 
 }
