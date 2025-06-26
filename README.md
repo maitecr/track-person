@@ -27,3 +27,6 @@ lib\util\location_util.dart
 ```
 * Instalar dependências: `flutter pub get`
 * Executar código: `flutter run`
+
+## Demonstração
+Você pode conferir um vídeo demonstrativo da aplicação em execução [neste link](https://www.youtube.com/shorts/V-rgGpLCWGs)
