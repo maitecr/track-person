@@ -17,7 +17,6 @@ class NotificationService {
 static Future<void> showNotification(String title, String body) async {
   final int notificationId = DateTime.now().millisecondsSinceEpoch.remainder(2147483647);
  
-
   const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
     'alert_channel',
     'Alertas de Localização',

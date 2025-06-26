@@ -42,7 +42,13 @@ class _TrackPacientAddLocalFormScreenState extends State<TrackPacientAddLocalFor
   void _submitForm() {
     if(!_isValidForm()) return;
 
-    Provider.of<OriginalPlace>(context, listen: false).addLocationToPatient(widget.patient.id, _titleController.text, _pickedPosition!, _pickedRadius!);
+    Provider.of<OriginalPlace>(context, listen: false).
+      addLocationToPatient(
+        widget.patient.id, 
+        _titleController.text, 
+        _pickedPosition!, 
+        _pickedRadius!
+      );
 
     Navigator.of(context).pop();
   }
