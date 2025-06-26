@@ -12,7 +12,7 @@ Projeto desenvolvido como atividade avaliativa no curso de Análise e Desenvolvi
 
 A aplicação foi desenvolvida usando Flutter, Dart, Firebase e a API do Google Cloud para utilização do Maps. 
 
-Para exibir rastreio em tempo real, foi desenvolvida uma segunda aplicação que é executada no dispositivo da pessoa monitorada, enviando sua posição geográfica para o Firebase, tornando possível a funcionalidade de monitoramento do presente projeto. Esta segunda aplicação por ser encontrada [neste repositório](https://github.com/maitecr/tracked-patient).
+Para exibir rastreio em tempo real, foi desenvolvida uma segunda aplicação que é executada em segundo plano no dispositivo da pessoa monitorada, enviando sua posição geográfica para o Firebase, tornando possível a funcionalidade de monitoramento do presente projeto. Esta segunda aplicação poode ser encontrada [neste repositório](https://github.com/maitecr/tracked-patient).
 
 ## Como executar
 
