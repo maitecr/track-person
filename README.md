@@ -1,16 +1,29 @@
-# track_person
+# Track
 
-A new Flutter project.
+Projeto desenvolvido como atividade avaliativa no curso de Análise e Desenvolvimento de sistemas. Consiste em um aplicativo mobile que permite monitorar em tempo real as pessoas que forem cadastradas nele, além de enviar notificações para o usuário quando a pessoa monitorada se encontrar fora das localidades delimitadas a ela como seguras.
 
-## Getting Started
+## A aplicação permite:
+* Cadastro do usuário
+* Logout
+* Inserir pessoa monitorada
+* Adicionar mais de uma área de segurança para a mesma pessoa
+* Monitorar no mapa o deslocamento em tempo real
+* Notificar quando o monitorado está fora da área de segurança
 
-This project is a starting point for a Flutter application.
+A aplicação foi desenvolvida usando Flutter, Dart, Firebase e a API do Google Cloud para utilização do Maps. 
 
-A few resources to get you started if this is your first Flutter project:
+Para exibir rastreio em tempo real, foi desenvolvida uma segunda aplicação que é executada no dispositivo da pessoa monitorada, enviando sua posição geográfica para o Firebase, tornando possível a funcionalidade de monitoramento do presente projeto. Esta segunda aplicação por ser encontrada [neste repositório](https://github.com/maitecr/tracked-patient).
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Como executar
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* Adição do google-services.json para autenticação e serviços Firebase 
+* Habilitação de serviços do Firebase (Firebase Auth, Firestore)
+* Inserir sua Google API Key nos arquivos:
+```
+android\app\src\main\AndroidManifest.xml
+```
+```
+lib\util\location_util.dart
+```
+* Instalar dependências: `flutter pub get`
+* Executar código: `flutter run`
